@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
+﻿using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -9,7 +6,6 @@ using HarmonyLib;
 using LocationManager;
 using ServerSync;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace LocationManagerModTemplate
 {
