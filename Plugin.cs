@@ -92,6 +92,25 @@ namespace LocationManagerModTemplate
                 Count = 15,
                 Unique = true
             };
+            
+            LocationManager.Location location = new("krumpaclocations", "WaterPit1")
+            {
+                MapIcon = "K_Church_Ruin01.png",
+                ShowMapIcon = ShowIcon.Always,
+                Biome = Heightmap.Biome.Meadows,
+                SpawnDistance = new Range(100, 1500),
+                SpawnAltitude = new Range(5, 150),
+                MinimumDistanceFromGroup = 100,
+                Count = 15
+            };
+		
+            // If your location has creature spawners, you can configure the creature they spawn like this.
+            location.CreatureSpawner.Add("Spawner_1", "Neck");
+            location.CreatureSpawner.Add("Spawner_2", "Troll");
+            location.CreatureSpawner.Add("Spawner_3", "Greydwarf");
+            location.CreatureSpawner.Add("Spawner_4", "Neck");
+            location.CreatureSpawner.Add("Spawner_5", "Troll");
+            location.CreatureSpawner.Add("Spawner_6", "Greydwarf");
 
             SetupWatcher();
         }
