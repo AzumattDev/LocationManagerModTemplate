@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using HarmonyLib;
 
 namespace LocationManagerModTemplate
@@ -18,6 +22,7 @@ namespace LocationManagerModTemplate
             LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogInfo("Invoking version check");
             ZPackage zpackage = new();
             zpackage.Write(LocationManagerModTemplatePlugin.ModVersion);
+            zpackage.Write(RpcHandlers.ComputeHashForMod().Replace("-", ""));
             peer.m_rpc.Invoke($"{LocationManagerModTemplatePlugin.ModName}_VersionCheck", zpackage);
         }
     }
@@ -76,17 +81,18 @@ namespace LocationManagerModTemplate
         public static void RPC_LocationManagerModTemplate_Version(ZRpc rpc, ZPackage pkg)
         {
             string? version = pkg.ReadString();
+            string? hash = pkg.ReadString();
+
+            var hashForAssembly = ComputeHashForMod().Replace("-", "");
             LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogInfo("Version check, local: " +
                                                                    LocationManagerModTemplatePlugin.ModVersion +
                                                                    ",  remote: " + version);
-            if (version != LocationManagerModTemplatePlugin.ModVersion)
+            if (hash != hashForAssembly || version != LocationManagerModTemplatePlugin.ModVersion)
             {
-                LocationManagerModTemplatePlugin.ConnectionError =
-                    $"{LocationManagerModTemplatePlugin.ModName} Installed: {LocationManagerModTemplatePlugin.ModVersion}\n Needed: {version}";
+                LocationManagerModTemplatePlugin.ConnectionError = $"{LocationManagerModTemplatePlugin.ModName} Installed: {LocationManagerModTemplatePlugin.ModVersion} {hashForAssembly}\n Needed: {version} {hash}";
                 if (!ZNet.instance.IsServer()) return;
                 // Different versions - force disconnect client from server
-                LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogWarning(
-                    $"Peer ({rpc.m_socket.GetHostName()}) has incompatible version, disconnecting");
+                LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogWarning($"Peer ({rpc.m_socket.GetHostName()}) has incompatible version, disconnecting...");
                 rpc.Invoke("Error", 3);
             }
             else
@@ -104,6 +110,21 @@ namespace LocationManagerModTemplate
                     ValidatedPeers.Add(rpc);
                 }
             }
+        }
+        
+        public static string ComputeHashForMod()
+        {
+            using SHA256 sha256Hash = SHA256.Create();
+            // ComputeHash - returns byte array  
+            byte[] bytes = sha256Hash.ComputeHash(File.ReadAllBytes(Assembly.GetExecutingAssembly().Location));
+            // Convert byte array to a string   
+            StringBuilder builder = new();
+            foreach (byte b in bytes)
+            {
+                builder.Append(b.ToString("X2"));
+            }
+
+            return builder.ToString();
         }
     }
 }

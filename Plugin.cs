@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using JetBrains.Annotations;
 using LocalizationManager;
 using LocationManager;
 using ServerSync;
@@ -30,10 +32,12 @@ namespace LocationManagerModTemplate
 
         private static readonly ConfigSync ConfigSync = new(ModGUID)
             { DisplayName = ModName, CurrentVersion = ModVersion, MinimumRequiredVersion = ModVersion };
-
-        public Texture2D tex;
-        private Sprite mySprite;
-        private SpriteRenderer sr;
+        
+        public Texture2D tex = null!;
+        
+        // Use only if you need them
+        //private Sprite mySprite = null!;
+        //private SpriteRenderer sr = null!;
 
         public enum Toggle
         {
@@ -96,7 +100,7 @@ namespace LocationManagerModTemplate
                 Count = 15,
                 Unique = true
             };
-            
+
             LocationManager.Location location = new("krumpaclocations", "WaterPit1")
             {
                 MapIcon = "K_Church_Ruin01.png",
@@ -107,7 +111,7 @@ namespace LocationManagerModTemplate
                 MinimumDistanceFromGroup = 100,
                 Count = 15
             };
-		
+
             // If your location has creature spawners, you can configure the creature they spawn like this.
             location.CreatureSpawner.Add("Spawner_1", "Neck");
             location.CreatureSpawner.Add("Spawner_2", "Troll");
@@ -180,7 +184,10 @@ namespace LocationManagerModTemplate
 
         private class ConfigurationManagerAttributes
         {
-            public bool? Browsable = false;
+            [UsedImplicitly] public int? Order = null!;
+            [UsedImplicitly] public bool? Browsable = null!;
+            [UsedImplicitly] public string? Category = null!;
+            [UsedImplicitly] public Action<ConfigEntryBase>? CustomDrawer = null!;
         }
 
         class AcceptableShortcuts : AcceptableValueBase // Used for KeyboardShortcut Configs 
@@ -193,7 +200,7 @@ namespace LocationManagerModTemplate
             public override bool IsValid(object value) => true;
 
             public override string ToDescriptionString() =>
-                "# Acceptable values: " + string.Join(", ", KeyboardShortcut.AllKeyCodes);
+                "# Acceptable values: " + string.Join(", ", UnityInput.Current.SupportedKeyCodes);
         }
 
         #endregion
