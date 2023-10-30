@@ -22,7 +22,6 @@ namespace LocationManagerModTemplate
             LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogInfo("Invoking version check");
             ZPackage zpackage = new();
             zpackage.Write(LocationManagerModTemplatePlugin.ModVersion);
-            zpackage.Write(RpcHandlers.ComputeHashForMod().Replace("-", ""));
             peer.m_rpc.Invoke($"{LocationManagerModTemplatePlugin.ModName}_VersionCheck", zpackage);
         }
     }
@@ -34,15 +33,14 @@ namespace LocationManagerModTemplate
         {
             if (!__instance.IsServer() || RpcHandlers.ValidatedPeers.Contains(rpc)) return true;
             // Disconnect peer if they didn't send mod version at all
-            LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogWarning(
-                $"Peer ({rpc.m_socket.GetHostName()}) never sent version or couldn't due to previous disconnect, disconnecting");
+            LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogWarning($"Peer ({rpc.m_socket.GetHostName()}) never sent version or couldn't due to previous disconnect, disconnecting");
             rpc.Invoke("Error", 3);
             return false; // Prevent calling underlying method
         }
 
         private static void Postfix(ZNet __instance)
         {
-            ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.instance.GetServerPeerID(), "RequestAdminSync",
+            ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.instance.GetServerPeerID(), $"{LocationManagerModTemplatePlugin.ModName}RequestAdminSync",
                 new ZPackage());
         }
     }
@@ -81,15 +79,12 @@ namespace LocationManagerModTemplate
         public static void RPC_LocationManagerModTemplate_Version(ZRpc rpc, ZPackage pkg)
         {
             string? version = pkg.ReadString();
-            string? hash = pkg.ReadString();
-
-            var hashForAssembly = ComputeHashForMod().Replace("-", "");
             LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogInfo("Version check, local: " +
                                                                    LocationManagerModTemplatePlugin.ModVersion +
                                                                    ",  remote: " + version);
-            if (hash != hashForAssembly || version != LocationManagerModTemplatePlugin.ModVersion)
+            if (version != LocationManagerModTemplatePlugin.ModVersion)
             {
-                LocationManagerModTemplatePlugin.ConnectionError = $"{LocationManagerModTemplatePlugin.ModName} Installed: {LocationManagerModTemplatePlugin.ModVersion} {hashForAssembly}\n Needed: {version} {hash}";
+                LocationManagerModTemplatePlugin.ConnectionError = $"{LocationManagerModTemplatePlugin.ModName} Installed: {LocationManagerModTemplatePlugin.ModVersion}\n Needed: {version}";
                 if (!ZNet.instance.IsServer()) return;
                 // Different versions - force disconnect client from server
                 LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogWarning($"Peer ({rpc.m_socket.GetHostName()}) has incompatible version, disconnecting...");
