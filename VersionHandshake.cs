@@ -15,8 +15,7 @@ namespace LocationManagerModTemplate
         {
             // Register version check call
             LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogDebug("Registering version RPC handler");
-            peer.m_rpc.Register($"{LocationManagerModTemplatePlugin.ModName}_VersionCheck",
-                new Action<ZRpc, ZPackage>(RpcHandlers.RPC_LocationManagerModTemplate_Version));
+            peer.m_rpc.Register($"{LocationManagerModTemplatePlugin.ModName}_VersionCheck", new Action<ZRpc, ZPackage>(RpcHandlers.RPC_LocationManagerModTemplate_Version));
 
             // Make calls to check versions
             LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogInfo("Invoking version check");
@@ -40,8 +39,7 @@ namespace LocationManagerModTemplate
 
         private static void Postfix(ZNet __instance)
         {
-            ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.instance.GetServerPeerID(), $"{LocationManagerModTemplatePlugin.ModName}RequestAdminSync",
-                new ZPackage());
+            ZRoutedRpc.instance.InvokeRoutedRPC(ZRoutedRpc.instance.GetServerPeerID(), $"{LocationManagerModTemplatePlugin.ModName}RequestAdminSync", new ZPackage());
         }
     }
 
@@ -54,7 +52,7 @@ namespace LocationManagerModTemplate
             {
                 __instance.m_connectionFailedError.fontSizeMax = 25;
                 __instance.m_connectionFailedError.fontSizeMin = 15;
-                __instance.m_connectionFailedError.text += "\n" + LocationManagerModTemplatePlugin.ConnectionError;
+                __instance.m_connectionFailedError.text += $"\n{LocationManagerModTemplatePlugin.ConnectionError}";
             }
         }
     }
@@ -66,8 +64,7 @@ namespace LocationManagerModTemplate
         {
             if (!__instance.IsServer()) return;
             // Remove peer from validated list
-            LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogInfo(
-                $"Peer ({peer.m_rpc.m_socket.GetHostName()}) disconnected, removing from validated list");
+            LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogInfo($"Peer ({peer.m_rpc.m_socket.GetHostName()}) disconnected, removing from validated list");
             _ = RpcHandlers.ValidatedPeers.Remove(peer.m_rpc);
         }
     }
@@ -79,9 +76,7 @@ namespace LocationManagerModTemplate
         public static void RPC_LocationManagerModTemplate_Version(ZRpc rpc, ZPackage pkg)
         {
             string? version = pkg.ReadString();
-            LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogInfo("Version check, local: " +
-                                                                   LocationManagerModTemplatePlugin.ModVersion +
-                                                                   ",  remote: " + version);
+            LocationManagerModTemplatePlugin.LocationManagerModTemplateLogger.LogInfo($"Version check, local: {LocationManagerModTemplatePlugin.ModVersion},  remote: {version}");
             if (version != LocationManagerModTemplatePlugin.ModVersion)
             {
                 LocationManagerModTemplatePlugin.ConnectionError = $"{LocationManagerModTemplatePlugin.ModName} Installed: {LocationManagerModTemplatePlugin.ModVersion}\n Needed: {version}";
