@@ -31,9 +31,9 @@ namespace LocationManagerModTemplate
         public static readonly ManualLogSource LocationManagerModTemplateLogger = BepInEx.Logging.Logger.CreateLogSource(ModName);
 
         private static readonly ConfigSync ConfigSync = new(ModGUID) { DisplayName = ModName, CurrentVersion = ModVersion, MinimumRequiredVersion = ModVersion };
-        
+
         public Texture2D tex = null!;
-        
+
         // Use only if you need them
         //private Sprite mySprite = null!;
         //private SpriteRenderer sr = null!;
@@ -119,6 +119,13 @@ namespace LocationManagerModTemplate
             location.CreatureSpawner.Add("Spawner_6", "Greydwarf");
 
             SetupWatcher();
+
+            // If you want to do something once localization completes, LocalizationManager has a hook for that.
+            /*Localizer.OnLocalizationComplete += () =>
+            {
+                // Do something
+                ItemManagerModTemplateLogger.LogDebug("OnLocalizationComplete called");
+            };*/
         }
 
         private void OnDestroy()
@@ -196,17 +203,20 @@ namespace LocationManagerModTemplate
 
         #endregion
     }
-    
+
     public static class KeyboardExtensions
     {
-        public static bool IsKeyDown(this KeyboardShortcut shortcut)
+        extension(KeyboardShortcut shortcut)
         {
-            return shortcut.MainKey != KeyCode.None && Input.GetKeyDown(shortcut.MainKey) && shortcut.Modifiers.All(Input.GetKey);
-        }
+            public bool IsKeyDown()
+            {
+                return shortcut.MainKey != KeyCode.None && Input.GetKeyDown(shortcut.MainKey) && shortcut.Modifiers.All(Input.GetKey);
+            }
 
-        public static bool IsKeyHeld(this KeyboardShortcut shortcut)
-        {
-            return shortcut.MainKey != KeyCode.None && Input.GetKey(shortcut.MainKey) && shortcut.Modifiers.All(Input.GetKey);
+            public bool IsKeyHeld()
+            {
+                return shortcut.MainKey != KeyCode.None && Input.GetKey(shortcut.MainKey) && shortcut.Modifiers.All(Input.GetKey);
+            }
         }
     }
 }
